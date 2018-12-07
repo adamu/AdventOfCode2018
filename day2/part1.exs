@@ -25,7 +25,6 @@ defmodule Part1 do
       |> Stream.map(&String.trim/1)
       |> Stream.map(&to_freq_map/1)
       |> Enum.reduce({0, 0}, &count_twos_and_threes/2)
-      |> IO.inspect()
 
     IO.puts("#{twos} * #{threes} = #{twos * threes}")
   end
