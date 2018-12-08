@@ -59,10 +59,41 @@ defmodule Day4 do
     |> Enum.max_by(fn {_minute, freq} -> freq end)
     |> elem(0)
   end
+
+  def part1 do
+    sleepy = sleepy()
+    most_min_slept = most_min_slept(sleepy)
+    IO.puts("Guard most often asleep: #{sleepy}")
+    IO.puts("Most mintutes that guard slept: #{most_min_slept}")
+    IO.puts("Part 1 answer: #{sleepy * most_min_slept}")
+  end
+
+  def most_sleepy_guard_in(guard_freq_map) do
+    Enum.reduce(guard_freq_map, {nil, 0}, fn {curr_id, curr_freq}, {max_id, max_freq} ->
+      if curr_freq > max_freq, do: {curr_id, curr_freq}, else: {max_id, max_freq}
+    end)
+  end
+
+  def part2 do
+    {minute, {id, _freq}} =
+      parse_log()
+      |> Enum.chunk_every(2)
+      |> Enum.map(fn [{sleep, _, _}, {wake, _, id}] -> {id, sleep.minute..(wake.minute - 1)} end)
+      |> Enum.reduce(%{}, fn {id, range}, minute_map ->
+        Enum.reduce(range, minute_map, fn minute, minute_map ->
+          Map.update(minute_map, minute, %{id => 1}, fn guard_map ->
+            Map.update(guard_map, id, 1, &(&1 + 1))
+          end)
+        end)
+      end)
+      |> Enum.map(fn {minute, freq_map} -> {minute, most_sleepy_guard_in(freq_map)} end)
+      |> Enum.max_by(fn {_minute, {_id, freq}} -> freq end)
+
+    IO.puts("The guard that was most freequently alseep on the same minute: #{id}")
+    IO.puts("The minute that guard was most frequently asleep on: #{minute}")
+    IO.puts("Part 2 answer: #{id * minute}")
+  end
 end
 
-sleepy = Day4.sleepy()
-most_min_slept = Day4.most_min_slept(sleepy)
-IO.puts("Most sleepy guard ID: #{sleepy}")
-IO.puts("Most min slept: #{most_min_slept}")
-IO.puts("Multiplied: #{sleepy * most_min_slept}")
+Day4.part1()
+Day4.part2()
