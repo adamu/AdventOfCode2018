@@ -17,8 +17,7 @@ defmodule Day5 do
     |> String.trim()
     |> String.to_charlist()
     |> react()
-    |> Enum.count()
-    |> IO.puts()
+    |> length()
   end
 
   def part2 do
@@ -31,12 +30,12 @@ defmodule Day5 do
       for lower <- ?a..?z, upper = lower - 32 do
         Enum.reject(polymer, &(&1 in [lower, upper]))
         |> react()
-        |> Enum.count()
+        |> length()
       end
 
-    Enum.min(lengths) |> IO.puts()
+    Enum.min(lengths)
   end
 end
 
-Day5.part1()
-Day5.part2()
+IO.puts(Day5.part1())
+IO.puts(Day5.part2())
