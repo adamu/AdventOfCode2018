@@ -19,23 +19,39 @@ defmodule Claim do
     y_coords = claim.pos.y..(claim.pos.y + claim.len.y - 1)
     for x <- x_coords, y <- y_coords, do: %Coord{x: x, y: y}
   end
+
+  def unshared?(claim, unshared_inches) do
+    Enum.all?(all_coords(claim), &MapSet.member?(unshared_inches, &1))
+  end
 end
 
-defmodule Part1 do
+defmodule Day3 do
   def count_claim_inches(claim, count) do
     Enum.reduce(Claim.all_coords(claim), count, fn coord, count ->
       Map.update(count, coord, 1, &(&1 + 1))
     end)
   end
 
-  def run do
+  def part1 do
     File.stream!("input")
     |> Stream.map(&Claim.new_from_str/1)
     |> Enum.reduce(%{}, &count_claim_inches/2)
     |> Stream.filter(fn {_coord, count} -> count >= 2 end)
     |> Enum.count()
-    |> IO.puts()
+  end
+
+  def part2 do
+    all_claims = File.stream!("input") |> Enum.map(&Claim.new_from_str/1)
+
+    unshared_inches =
+      all_claims
+      |> Enum.reduce(%{}, &count_claim_inches/2)
+      |> Enum.filter(fn {_coord, count} -> count == 1 end)
+      |> MapSet.new(fn {coord, _count} -> coord end)
+
+    Enum.find(all_claims, &Claim.unshared?(&1, unshared_inches))
   end
 end
 
-Part1.run()
+IO.puts("Part1 (number of square inches claimed multiple times): #{Day3.part1()}")
+IO.puts("Part2 (id of only claim not overlapping with another): #{Day3.part2().id}")
