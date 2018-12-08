@@ -20,6 +20,23 @@ defmodule Day5 do
     |> Enum.count()
     |> IO.puts()
   end
+
+  def part2 do
+    polymer =
+      File.read!("input")
+      |> String.trim()
+      |> String.to_charlist()
+
+    lengths =
+      for lower <- ?a..?z, upper = lower - 32 do
+        Enum.reject(polymer, &(&1 in [lower, upper]))
+        |> react()
+        |> Enum.count()
+      end
+
+    Enum.min(lengths) |> IO.puts()
+  end
 end
 
 Day5.part1()
+Day5.part2()
