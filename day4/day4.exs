@@ -69,9 +69,7 @@ defmodule Day4 do
   end
 
   def most_sleepy_guard_in(guard_freq_map) do
-    Enum.reduce(guard_freq_map, {nil, 0}, fn {curr_id, curr_freq}, {max_id, max_freq} ->
-      if curr_freq > max_freq, do: {curr_id, curr_freq}, else: {max_id, max_freq}
-    end)
+    Enum.max_by(guard_freq_map, fn {_id, freq} -> freq end)
   end
 
   def part2 do
