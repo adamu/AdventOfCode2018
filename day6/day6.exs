@@ -97,6 +97,22 @@ defmodule Day6 do
     |> Map.values()
     |> Enum.max()
   end
+
+  def part2 do
+    danger_pts = parse_danger_pt_list()
+
+    danger_pts
+    |> bounding_box()
+    |> Area.all_coords()
+    |> Enum.map(fn coord ->
+      Enum.reduce(danger_pts, 0, fn danger_pt, dist ->
+        dist + manhattan_distance(coord, danger_pt)
+      end)
+    end)
+    |> Enum.filter(&(&1 < 10_000))
+    |> length()
+  end
 end
 
 IO.puts(Day6.part1())
+IO.puts(Day6.part2())
