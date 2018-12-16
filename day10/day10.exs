@@ -42,8 +42,6 @@ defmodule Day10 do
     starfield = MapSet.new(stars, fn star -> {star.pos_x, star.pos_y} end)
 
     {min_x, min_y, max_x, max_y} = bounding_box(stars)
-    IO.inspect(max_x - min_x, label: "width")
-    IO.inspect(max_y - min_y, label: "height")
 
     grid =
       for y <- min_y..max_y, x <- min_x..max_x do
@@ -75,17 +73,19 @@ defmodule Day10 do
     Enum.any?(neighbours, &Map.has_key?(starfield, &1))
   end
 
-  def wait_for_alignment(stars) do
+  def wait_for_alignment(stars, count) do
     if aligned?(stars) do
-      stars
+      {stars, count}
     else
-      stars |> Star.move_all(1) |> wait_for_alignment()
+      stars |> Star.move_all(1) |> wait_for_alignment(count + 1)
     end
   end
 
-  def part1 do
-    init() |> wait_for_alignment() |> draw()
+  def go do
+    {stars, count} = init() |> wait_for_alignment(0)
+    IO.puts(draw(stars))
+    IO.puts("#{count} seconds")
   end
 end
 
-IO.puts(Day10.part1())
+Day10.go()
