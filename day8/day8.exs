@@ -25,22 +25,21 @@ defmodule Day8 do
     sum_node(tree, 0)
   end
 
-  def select_children(children, indices) do
-    child_map =
-      children
+  def select(nodes, indices) do
+    node_map =
+      nodes
       |> Enum.with_index(1)
-      |> Map.new(fn {child, index} -> {index, child} end)
+      |> Map.new(fn {node, index} -> {index, node} end)
 
     indices
-    |> Enum.map(&Map.get(child_map, &1))
+    |> Enum.map(&Map.get(node_map, &1))
     |> Enum.reject(&(&1 === nil))
   end
 
   def value_node({items, []}), do: Enum.sum(items)
 
   def value_node({items, children}) do
-    select_children(children, items)
-    |> Enum.reduce(0, fn child, value -> value + value_node(child) end)
+    children |> select(items) |> Enum.map(&value_node/1) |> Enum.sum()
   end
 
   def part2 do
