@@ -46,7 +46,7 @@ defmodule Day10 do
     grid =
       for y <- min_y..max_y, x <- min_x..max_x do
         eol = if x === max_x, do: "\n", else: ""
-        char = if MapSet.member?(starfield, {x, y}), do: "#", else: "."
+        char = if MapSet.member?(starfield, {x, y}), do: "#", else: " "
         char <> eol
       end
 
@@ -54,7 +54,7 @@ defmodule Day10 do
   end
 
   def aligned?(stars) do
-    starfield = Map.new(stars, fn star -> {{star.pos_x, star.pos_y}, star} end)
+    starfield = MapSet.new(stars, fn star -> {star.pos_x, star.pos_y} end)
     Enum.all?(stars, &aligned?(&1, starfield))
   end
 
@@ -70,7 +70,7 @@ defmodule Day10 do
       {star.pos_x + 1, star.pos_y + 1}
     ]
 
-    Enum.any?(neighbours, &Map.has_key?(starfield, &1))
+    Enum.any?(neighbours, &MapSet.member?(starfield, &1))
   end
 
   def wait_for_alignment(stars, count) do
