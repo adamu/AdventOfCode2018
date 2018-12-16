@@ -84,6 +84,19 @@ defmodule Day9 do
 
     Game.start(players, marbles)
   end
+
+  # Probably supposed to make this more efficient, but it still runs in 30 seconds...
+  def part2 do
+    input = File.read!("input")
+    pattern = ~r/(\d+) players; last marble is worth (\d+) points/
+
+    [players, marbles] =
+      Regex.run(pattern, input, capture: :all_but_first)
+      |> Enum.map(&String.to_integer/1)
+
+    Game.start(players, marbles * 100)
+  end
 end
 
 IO.puts(Day9.part1())
+IO.puts(Day9.part2())
