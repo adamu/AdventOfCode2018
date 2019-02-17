@@ -28,6 +28,7 @@ defmodule Day12 do
   def evolve(input, _spec, 0), do: input
 
   def evolve(input, spec, generations) do
+    if rem(generations, 10000) === 0, do: IO.puts(generations)
     input = generation(input, spec)
     evolve(input, spec, generations - 1)
   end
@@ -67,4 +68,10 @@ defmodule Day12 do
     |> Enum.map(fn {_, pot} -> pot end)
     |> Enum.sum()
   end
+
+  # Part 2
+  # Above solution is obviously way too slow for 50B iterations.
+  # Unfortunately I inadvertently read the trick when looking for hints,
+  # so lost the motivation to do this now. If I get bored, or really want the
+  # star, maybe I'll come back and do it.
 end
