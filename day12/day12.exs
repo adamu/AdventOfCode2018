@@ -25,16 +25,25 @@ defmodule Day12 do
     end
   end
 
-  def evolve(input, _spec, 0), do: input
+  def evolve(input, _spec, 0, _previous), do: input
 
-  def evolve(input, spec, generations) do
-    if rem(generations, 10000) === 0, do: IO.puts(generations)
-    input = generation(input, spec)
-    evolve(input, spec, generations - 1)
+  def evolve(input, spec, generations, previous) do
+    next = generation(input, spec)
+    IO.inspect("#{generations}: #{next |> visualise}")
+
+    if stable?(next, input) do
+      # Stable state, so we can just add the remaining generation count to the index numbers and finish early
+      next = Enum.map(next, fn {pot, idx} -> {pot, idx + generations - 1} end)
+      evolve(next, spec, 0, input)
+    else
+      evolve(next, spec, generations - 1, input)
+    end
   end
 
+  def stable?(next, prev), do: visualise(next) === visualise(prev)
+
   def generation(input, spec) do
-    input |> pad |> propagate(spec)
+    input |> pad |> propagate(spec) |> strip
   end
 
   def propagate([a, b, c, d, e | rest], spec) do
@@ -56,6 +65,13 @@ defmodule Day12 do
   def pad_rear([{?., _}, {?., _}, {?., _}, {?., _} | _] = done), do: done
   def pad_rear([{_, i} | _] = list), do: pad_rear([{?., i + 1} | list])
 
+  # Removes leading and trailing empty pots
+  def strip([{?., _}]), do: []
+  def strip([{?., _} | list]), do: strip(list)
+  def strip([{?#, _} | _] = list), do: strip_tl(Enum.reverse(list))
+  def strip_tl([{?., _} | list]), do: strip_tl(list)
+  def strip_tl(list), do: Enum.reverse(list)
+
   def visualise(input) do
     Enum.map(input, fn {x, _i} -> x end)
   end
@@ -63,15 +79,23 @@ defmodule Day12 do
   def part1 do
     {input, spec} = Parser.parse("input")
 
-    evolve(input, spec, 20)
+    evolve(input, spec, 20, [])
     |> Enum.filter(fn {plant, _} -> plant === ?# end)
     |> Enum.map(fn {_, pot} -> pot end)
     |> Enum.sum()
   end
 
-  # Part 2
-  # Above solution is obviously way too slow for 50B iterations.
-  # Unfortunately I inadvertently read the trick when looking for hints,
-  # so lost the motivation to do this now. If I get bored, or really want the
-  # star, maybe I'll come back and do it.
+  def part2 do
+    {input, spec} = Parser.parse("input")
+
+    evolve(input, spec, 50_000_000_000, [])
+    |> Enum.filter(fn {plant, _} -> plant === ?# end)
+    |> Enum.map(fn {_, pot} -> pot end)
+    |> Enum.sum()
+  end
 end
+
+part1 = Day12.part1()
+part2 = Day12.part2()
+IO.puts("part 1: #{part1}")
+IO.puts("part 2: #{part2}")
