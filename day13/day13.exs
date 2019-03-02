@@ -19,7 +19,6 @@ defmodule Day13 do
     def parse_file(filename) do
       rows =
         File.read!(filename)
-        |> String.trim()
         |> String.split("\n")
         |> Enum.map(&String.to_charlist/1)
 
@@ -123,7 +122,6 @@ defmodule Day13 do
 
     next_pos = next_pos(row, col, cart)
 
-    # Check if it crashed
     if crashed?(next_pos, unmoved_carts, moved_carts) do
       {:boom, next_pos}
     else
@@ -143,5 +141,39 @@ defmodule Day13 do
   def part1 do
     {track, carts} = Parser.parse_file("input")
     find_collision(track, carts)
+  end
+
+  # Part 2.
+  # Instead of stopping on a crash, we should instead remove the two carts that crashed.
+  # Terminating condition is when there is only one cart left.
+
+  def tick2([], _unmoved_carts, moved_carts, _track), do: moved_carts
+
+  def tick2([{{row, col}, cart} | sorted_carts], unmoved_carts, moved_carts, track) do
+    unmoved_carts = Map.delete(unmoved_carts, {row, col})
+    next_pos = next_pos(row, col, cart)
+
+    if crashed?(next_pos, unmoved_carts, moved_carts) do
+      unmoved_carts = Map.delete(unmoved_carts, next_pos)
+      moved_carts = Map.delete(moved_carts, next_pos)
+      # Could have deleted an unmoved, so need to re-sort the remaining carts to process
+      tick2(sort(unmoved_carts), unmoved_carts, moved_carts, track)
+    else
+      next_track = Map.fetch!(track, next_pos)
+      moved_cart = turn(cart, next_track)
+      tick2(sorted_carts, unmoved_carts, Map.put(moved_carts, next_pos, moved_cart), track)
+    end
+  end
+
+  def find_last_cart(track, carts), do: find_last_cart(track, carts, sort(carts))
+  def find_last_cart(_track, _carts, [{{row, col}, _cart}]), do: "#{col},#{row}"
+
+  def find_last_cart(track, carts, sorted_carts) do
+    find_last_cart(track, tick2(sorted_carts, carts, %{}, track))
+  end
+
+  def part2 do
+    {track, carts} = Parser.parse_file("input")
+    find_last_cart(track, carts)
   end
 end
